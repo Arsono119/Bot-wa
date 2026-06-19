@@ -1,9 +1,11 @@
 const { default: makeWASocket, useMultiFileAuthState, Browsers } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const config = require('./config');
-const { kataSapaan, sapaan } = require('./fitur/sapaan');
-const { menu } = require('./fitur/menu');
-const { waktu } = require('./fitur/waktu');
+const { kataSapaan, sapaan } = require('./handler/sapaan');
+const { menu } = require('./handler/menu');
+const { waktu } = require('./handler/waktu');
+const { tanyaAI, resetChat } = require('./fitur/ai');
+const { catatKeuangan, ringkasanKeuangan } = require('./handler/keuangan');
 
 async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState(config.sesiLogin);
@@ -40,6 +42,31 @@ async function startBot() {
         }
         else if (cmd === '! 1') {
             await waktu(sock, id);
+        }
+        else if (cmd === '!saldo') {
+            const ringkasan = ringkasanKeuangan(id);
+            await sock.sendMessage(id, { text: ringkasan });
+        }
+        else if (cmd === '!reset') {
+            resetChat(id);
+            await sock.sendMessage(id, { text: '🔄 Chat AI direset!' });
+        }
+        else {
+            const balasan = await tanyaAI(id, teks);
+
+            const catatMatch = balasan.match(/\[CATAT:({.*?})\]/);
+            if (catatMatch) {
+                try {
+                    const data = JSON.parse(catatMatch[1]);
+                    const hasil = catatKeuangan(id, data.tipe, data.jumlah, data.keterangan);
+                    const pesanBersih = balasan.replace(/\[CATAT:({.*?})\]/, '').trim();
+                    await sock.sendMessage(id, { text: `${pesanBersih}\n\n${hasil}` });
+                } catch {
+                    await sock.sendMessage(id, { text: balasan.replace(/\[CATAT:({.*?})\]/, '').trim() });
+                }
+            } else {
+                await sock.sendMessage(id, { text: balasan });
+            }
         }
     });
 }
