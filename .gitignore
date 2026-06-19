@@ -1,0 +1,7 @@
+node_modules/
+sesi_login/
+session/
+creds.json
+*.json
+data/
+config.js
