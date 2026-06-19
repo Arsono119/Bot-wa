@@ -1,9 +1,12 @@
-const { default: makeWASocket, useMultiFileAuthState, delay, Browsers } = require('@whiskeysockets/baileys');
+const { default: makeWASocket, useMultiFileAuthState, Browsers } = require('@whiskeysockets/baileys');
 const pino = require('pino');
-const { exec } = require('child_process');
+const config = require('./config');
+const { kataSapaan, sapaan } = require('./fitur/sapaan');
+const { menu } = require('./fitur/menu');
+const { waktu } = require('./fitur/waktu');
 
 async function startBot() {
-    const { state, saveCreds } = await useMultiFileAuthState('sesi_login');
+    const { state, saveCreds } = await useMultiFileAuthState(config.sesiLogin);
     const sock = makeWASocket({
         auth: state,
         logger: pino({ level: 'silent' }),
@@ -15,7 +18,7 @@ async function startBot() {
 
     sock.ev.on('connection.update', ({ connection }) => {
         if (connection === 'close') startBot();
-        else if (connection === 'open') console.log('\n🎉 BOT BERHASIL AKTIF!');
+        else if (connection === 'open') console.log(config.pesanAktif);
     });
 
     sock.ev.on('messages.upsert', async (m) => {
@@ -26,30 +29,17 @@ async function startBot() {
         const id = msg.key.remoteJid;
         const cmd = teks.trim().toLowerCase();
 
-        // --- PING ---
         if (cmd === 'ping') {
             await sock.sendMessage(id, { text: '🏓 Pong! Bot aktif.' });
         }
-
-        // --- SAPAAN ---
-        else if (['halo', 'hi', 'hey', 'hai', 'hello', 'p'].includes(cmd)) {
-            await sock.sendMessage(id, { 
-                text: `👋 Halo! Selamat datang!\nKetik *!menu* untuk melihat fitur yang tersedia.` 
-            });
+        else if (kataSapaan.includes(cmd)) {
+            await sapaan(sock, id);
         }
-
-        // --- MENU ---
         else if (cmd === '!menu') {
-            await sock.sendMessage(id, { 
-                text: `🤖 *MENU BOT* 🤖\n\n• *! 1* : Cek Waktu\n• *ping* : Cek Bot Aktif` 
-            });
+            await menu(sock, id);
         }
-
-        // --- CEK WAKTU ---
         else if (cmd === '! 1') {
-            exec('bash menu.sh waktu', (err, stdout) => {
-                sock.sendMessage(id, { text: stdout || 'Gagal mengambil waktu.' });
-            });
+            await waktu(sock, id);
         }
     });
 }
