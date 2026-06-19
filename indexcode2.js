@@ -26,27 +26,30 @@ async function startBot() {
         const id = msg.key.remoteJid;
         const cmd = teks.trim().toLowerCase();
 
-        // --- SISTEM RESPON FAQS & COMMAND ---
+        // --- PING ---
         if (cmd === 'ping') {
-            await sock.sendMessage(id, { text: 'pong! Bot aktif.' });
-        } 
-        else if (cmd === 'halo' || cmd === 'p') {
-            await sock.sendMessage(id, { text: 'Halo! Ketik *!menu* untuk melihat fitur.' });
-        } 
+            await sock.sendMessage(id, { text: '🏓 Pong! Bot aktif.' });
+        }
+
+        // --- SAPAAN ---
+        else if (['halo', 'hi', 'hey', 'hai', 'hello', 'p'].includes(cmd)) {
+            await sock.sendMessage(id, { 
+                text: `👋 Halo! Selamat datang!\nKetik *!menu* untuk melihat fitur yang tersedia.` 
+            });
+        }
+
+        // --- MENU ---
         else if (cmd === '!menu') {
-            await sock.sendMessage(id, { text: `🤖 *MENU BOT* 🤖\n
-            \n• *! 1* : Cek Waktu\n• *! 2* : Cek Internet Speed\n• *! 3* : Kalkulator` });
+            await sock.sendMessage(id, { 
+                text: `🤖 *MENU BOT* 🤖\n\n• *! 1* : Cek Waktu\n• *ping* : Cek Bot Aktif` 
+            });
         }
-        // --- JALANKAN MENU.SH SECARA OTOMATIS ---
+
+        // --- CEK WAKTU ---
         else if (cmd === '! 1') {
-            exec('bash menu.sh waktu', (err, stdout) => sock.sendMessage(id, { text: stdout || 'Gagal mengambil waktu.' }));
-        }
-        else if (cmd === '! 2') {
-            await sock.sendMessage(id, { text: '⏳ Menjalankan Speedtest...' });
-            exec('bash menu.sh speed', (err, stdout) => sock.sendMessage(id, { text: stdout || 'Gagal menjalankan speedtest.' }));
-        }
-        else if (cmd === '! 3') {
-            exec('bash menu.sh kalkulator', (err, stdout) => sock.sendMessage(id, { text: stdout || 'Gagal membuka kalkulator.' }));
+            exec('bash menu.sh waktu', (err, stdout) => {
+                sock.sendMessage(id, { text: stdout || 'Gagal mengambil waktu.' });
+            });
         }
     });
 }
