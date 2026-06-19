@@ -34,17 +34,18 @@ async function startBot() {
             await sock.sendMessage(id, { text: 'Halo! Ketik *!menu* untuk melihat fitur.' });
         } 
         else if (cmd === '!menu') {
-            await sock.sendMessage(id, { text: `🤖 *MENU BOT* 🤖\n\n• *!fitur 1* : Cek Waktu\n• *!fitur 2* : Cek Internet Speed\n• *!fitur 3* : Kalkulator` });
+            await sock.sendMessage(id, { text: `🤖 *MENU BOT* 🤖\n
+            \n• *! 1* : Cek Waktu\n• *! 2* : Cek Internet Speed\n• *! 3* : Kalkulator` });
         }
         // --- JALANKAN MENU.SH SECARA OTOMATIS ---
-        else if (cmd === '!fitur 1') {
+        else if (cmd === '! 1') {
             exec('bash menu.sh waktu', (err, stdout) => sock.sendMessage(id, { text: stdout || 'Gagal mengambil waktu.' }));
         }
-        else if (cmd === '!fitur 2') {
+        else if (cmd === '! 2') {
             await sock.sendMessage(id, { text: '⏳ Menjalankan Speedtest...' });
             exec('bash menu.sh speed', (err, stdout) => sock.sendMessage(id, { text: stdout || 'Gagal menjalankan speedtest.' }));
         }
-        else if (cmd === '!fitur 3') {
+        else if (cmd === '! 3') {
             exec('bash menu.sh kalkulator', (err, stdout) => sock.sendMessage(id, { text: stdout || 'Gagal membuka kalkulator.' }));
         }
     });
