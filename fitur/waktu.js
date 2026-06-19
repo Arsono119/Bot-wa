@@ -29,7 +29,7 @@ async function waktu(sock, id) {
 
     const pesan =
 `🕐 *CEK WAKTU GLOBAL* 🕐
-
+Bendera Negara Jam Menit Detik
 ━━━━━ 🌎 AMERIKA ━━━━━
 ${baris[0]}
 ${baris[1]}
