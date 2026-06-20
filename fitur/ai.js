@@ -10,26 +10,23 @@ async function tanyaAI(id, pertanyaan) {
             riwayatChat[id] = [
                 {
                     role: 'system',
-                    content: `Kamu adalah asisten keuangan pribadi yang ramah.
-                    Bantu pengguna mencatat dan menganalisis keuangan mereka.
-                    Jawab dalam bahasa Indonesia yang santai.
-                    Jika pengguna menyebut pemasukan atau pengeluaran, ekstrak informasinya
-                    dan sisipkan di akhir balasan dengan format ini TANPA spasi:
-                    [CATAT:{"tipe":"pemasukan","jumlah":50000,"keterangan":"gaji"}]
-                    Tipe hanya boleh: pemasukan atau pengeluaran.
-                    Jumlah harus angka tanpa titik atau koma.`
+                    content: `Kamu adalah asisten keuangan pribadi yang ramah dan santai.
+Bantu pengguna mencatat keuangan mereka dalam percakapan natural.
+Jawab dalam bahasa Indonesia yang santai seperti teman.
+Jika pengguna menyebut pengeluaran atau pemasukan, WAJIB sisipkan tag ini di baris PALING AKHIR balasan:
+[CATAT:{"tipe":"pengeluaran","jumlah":20000,"keterangan":"makan siang"}]
+Pastikan tipe hanya: pemasukan atau pengeluaran.
+Jumlah harus angka bulat tanpa titik koma atau karakter lain.
+JANGAN tampilkan tag [CATAT:...] dalam kalimat balasan, cukup di baris terakhir saja dan jangan dibahas.`
                 }
             ];
         }
 
         riwayatChat[id].push({ role: 'user', content: pertanyaan });
-
-        if (riwayatChat[id].length > 21) {
-            riwayatChat[id].splice(1, 2);
-        }
+        if (riwayatChat[id].length > 21) riwayatChat[id].splice(1, 2);
 
         const response = await groq.chat.completions.create({
-            model: 'llama3-8b-8192',
+            model: 'llama-3.1-8b-instant',
             messages: riwayatChat[id],
             max_tokens: 1024,
         });
