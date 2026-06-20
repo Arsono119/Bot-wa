@@ -1,3 +1,4 @@
+cat > handler / sapaan.js << 'EOF'
 const kataSapaan = ['halo', 'hi', 'hey', 'hai', 'hello', 'p'];
 
 async function sapaan(sock, id) {
@@ -7,3 +8,4 @@ async function sapaan(sock, id) {
 }
 
 module.exports = { kataSapaan, sapaan };
+EOF
