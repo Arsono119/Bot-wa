@@ -2,7 +2,7 @@ module.exports = {
     sesiLogin: 'sesi_login',
     pesanAktif: '\n🎉 BOT ANALISIS GRUP AKTIF!',
 
-    groqKey: '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',
+    groqKey: process.env.GROQ_KEY || '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',
 
     keywords: {
         'urgent': ['6282114295380@s.whatsapp.net'],

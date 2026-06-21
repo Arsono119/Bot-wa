@@ -4,3 +4,4 @@ session/
 creds.json
 *.json
 data/
+.env
