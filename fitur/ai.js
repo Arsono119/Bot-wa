@@ -8,37 +8,19 @@ const riwayatChat = {};
 const SYSTEM_PROMPT = `Kamu adalah asisten AI yang membantu di WhatsApp.
 
 Aturan:
-1. Jawab singkat, padat, jelas (maks 2-3 paragraf), langsung ke inti
+1. Jawab singkat, padat, dan jelas (maks 2-3 paragraf)
 2. Gunakan bahasa Indonesia yang santai
-3. Jika diberikan hasil pencarian internet, jawab berdasarkan info tersebut
-4. Jika tidak tahu, bilang tidak tahu
-5. Jangan menambahkan informasi yang tidak ada`;
+3. Jika diberikan hasil pencarian internet, WAJIB gunakan informasi tersebut untuk menjawab
+4. Sebutkan sumbernya jika relevan
+5. Jika tidak tahu, bilang tidak tahu
+6. Jangan mengada-ada atau menambahkan informasi yang tidak ada`;
 
-function butuhSearch(teks) {
-    const lower = teks.toLowerCase().trim().replace(/[^a-z0-9\s]/g, '');
-
-    // Skip pure greetings
-    const greetings = ['halo', 'hai', 'hi', 'hey', 'p', 'test', 'tes'];
-    if (greetings.includes(lower)) return false;
-    if (/^(halo|hai|hi|hey)\s/.test(lower) && !/\b(cari|berita|cuaca|harga|info|gempa)\b/.test(lower)) return false;
-    if (/^apa kabar/.test(lower)) return false;
-
-    const trigger = [
-        'cari', 'search', 'google', 'berita', 'cuaca', 'suhu',
-        'gempa', 'tsunami', 'banjir', 'harga', 'jadwal', 'skor',
-        'pemilu', 'presiden', 'peringatan dini',
-    ];
-
-    for (const k of trigger) {
-        if (lower.includes(k)) return true;
-    }
-
-    const contextual = ['terbaru', 'terkini', 'update', 'sekarang', 'hari ini'];
-    const words = lower.split(/\s+/).filter(w => w.length > 2);
-    for (const k of contextual) {
-        if (lower.includes(k) && words.length >= 2) return true;
-    }
-
+function sapaanSaja(teks) {
+    const lower = teks.toLowerCase().trim();
+    const sapa = ['halo', 'hai', 'hi', 'hey', 'p', 'test', 'tes'];
+    if (sapa.includes(lower)) return true;
+    if (/^(halo|hai|hi|hey)\s(apa kabar|kabar|gimana|baik)\b/.test(lower)) return true;
+    if (/^(makasih|terima kasih|thanks|ok|oke|sip|yes|ya)\b/.test(lower)) return true;
     return false;
 }
 
@@ -48,26 +30,20 @@ async function tanyaAI(id, pesan) {
             riwayatChat[id] = [{ role: 'system', content: SYSTEM_PROMPT }];
         }
 
-        riwayatChat[id].push({ role: 'user', content: pesan });
-        if (riwayatChat[id].length > 21) riwayatChat[id].splice(1, 2);
-
-        let searchInject = false;
+        // Search web for almost everything (except pure greetings)
         let finalPesan = pesan;
-
-        if (butuhSearch(pesan)) {
+        if (!sapaanSaja(pesan)) {
             const hasil = await searchWeb(pesan);
             if (hasil.length > 0) {
                 const konteks = hasil.map((r, i) =>
                     `${i + 1}. ${r.title}\n   ${r.url}\n   ${r.snippet}`
                 ).join('\n\n');
-                finalPesan = `${pesan}\n\nHasil pencarian:\n${konteks}`;
-                searchInject = true;
+                finalPesan = `Pertanyaan: ${pesan}\n\nHasil pencarian internet:\n${konteks}\n\nJawab berdasarkan hasil di atas jika relevan. Jika tidak, jawab dari pengetahuanmu.`;
             }
         }
 
-        if (searchInject) {
-            riwayatChat[id][riwayatChat[id].length - 1].content = finalPesan;
-        }
+        riwayatChat[id].push({ role: 'user', content: finalPesan });
+        if (riwayatChat[id].length > 21) riwayatChat[id].splice(1, 2);
 
         const response = await groq.chat.completions.create({
             model: 'llama-3.1-8b-instant',
