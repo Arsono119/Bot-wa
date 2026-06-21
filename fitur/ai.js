@@ -35,15 +35,15 @@ async function tanyaAI(id, pesan) {
         if (!sapaanSaja(pesan)) {
             const hasil = await searchWeb(pesan);
             if (hasil.length > 0) {
-                const konteks = hasil.map((r, i) =>
-                    `${i + 1}. ${r.title}\n   ${r.url}\n   ${r.snippet}`
-                ).join('\n\n');
-                finalPesan = `Pertanyaan: ${pesan}\n\nHasil pencarian internet:\n${konteks}\n\nJawab berdasarkan hasil di atas jika relevan. Jika tidak, jawab dari pengetahuanmu.`;
+                const konteks = hasil.slice(0, 3).map((r, i) =>
+                    `${i+1}. ${r.title} — ${r.snippet.substring(0, 80)}`
+                ).join('\n');
+                finalPesan = `Pertanyaan: ${pesan}\n\nInternet:\n${konteks}`;
             }
         }
 
         riwayatChat[id].push({ role: 'user', content: finalPesan });
-        if (riwayatChat[id].length > 21) riwayatChat[id].splice(1, 2);
+        if (riwayatChat[id].length > 9) riwayatChat[id].splice(1, 2);
 
         const response = await groq.chat.completions.create({
             model: 'llama-3.1-8b-instant',
