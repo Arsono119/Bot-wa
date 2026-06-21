@@ -1,5 +1,6 @@
 const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys');
 const pino = require('pino');
+const qrcode = require('qrcode-terminal');
 const config = require('./config');
 const { tanyaAI, resetChat } = require('./fitur/ai');
 const { analisisPesan, cekDuplikat } = require('./fitur/analyzer');
@@ -8,14 +9,21 @@ async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState(config.sesiLogin);
     const sock = makeWASocket({
         auth: state,
-        logger: pino({ level: 'silent' }),
+        logger: pino({ level: 'info' }),
         browser: ['Ubuntu', 'Chrome', '120.0'],
         syncFullHistory: false
     });
 
     sock.ev.on('creds.update', saveCreds);
 
-    sock.ev.on('connection.update', ({ connection }) => {
+    sock.ev.on('connection.update', ({ connection, qr }) => {
+        if (qr) {
+            console.log('\nâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+            console.log('  SCAN QR CODE INI DENGAN WHATSAPP KAMU');
+            console.log('  Buka WhatsApp > Titik 3 > Linked Devices');
+            console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•\n');
+            qrcode.generate(qr, { small: true });
+        }
         if (connection === 'close') startBot();
         else if (connection === 'open') console.log(config.pesanAktif);
     });
@@ -38,11 +46,7 @@ async function startBot() {
                 for (const target of targets) {
                     if (cekDuplikat(id, keyword, target, teks)) continue;
                     await sock.sendMessage(target, {
-                        text: `ðŸ”” *Notifikasi Grup*\n\n` +
-                              `ðŸ“Œ Kata kunci: *${keyword}*\n` +
-                              `ðŸ‘¤ Dari: @${pengirim.split('@')[0]}\n` +
-                              `ðŸ’¬ Pesan: ${teks}\n\n` +
-                              `_Balas chat ini untuk reply ke grup_`,
+                        text: `ðŸ”” *${keyword}*\nðŸ‘¤ @${pengirim.split('@')[0]}\nðŸ’¬ ${teks}`,
                         mentions: [pengirim]
                     });
                 }
