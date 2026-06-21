@@ -88,22 +88,60 @@ async function searchWebWithWeather(query) {
 function optimizeQuery(teks) {
     const lower = teks.toLowerCase();
 
+    // Gempa
     if (lower.includes('gempa')) {
-        return `gempa bumi terbaru indonesia 2026 magnitude lokasi`;
+        return 'gempa bumi terbaru indonesia 2026';
     }
 
+    // Harga
     if (lower.includes('harga')) {
         const match = teks.match(/harga\s+(.+)/i);
         const barang = match ? match[1].trim() : 'emas';
-        return `harga ${barang} hari ini 2026`;
+        return `harga ${barang} 2026`;
     }
 
+    // Cuaca handled by cariCuaca, but keep as fallback
+    if (lower.includes('cuaca') || lower.includes('suhu')) {
+        const match = teks.match(/(?:cuaca|suhu)\s+(?:di\s+)?(\w+)/i);
+        const tempat = match ? match[1] : 'indonesia';
+        return `prakiraan cuaca ${tempat} 2026`;
+    }
+
+    // Berita/topik terkini
     if (lower.includes('berita') || lower.includes('terbaru') || lower.includes('terkini')) {
-        const topik = teks.replace(/cari|search|berita|terbaru|terkini|tentang|info|dari|di/g, '').trim();
-        return topik ? `berita ${topik} 2026` : `berita terbaru indonesia hari ini`;
+        let topik = teks.replace(/\b(cari|search|berita|terbaru|terkini|tentang|info|dari|di|dan|atau)\b/gi, '');
+        topik = topik.replace(/\s+/g, ' ').trim();
+        return topik ? `${topik} 2026` : 'berita indonesia 2026';
     }
 
-    return teks;
+    // "apa yang terjadi di X" -> berita X
+    const apaTerjadi = lower.match(/apa\s+yang\s+terjadi\s+(?:di|dengan)\s+(.+)/);
+    if (apaTerjadi) {
+        return `berita ${apaTerjadi[1]} 2026`;
+    }
+
+    // "siapa X" -> langsung X
+    const siapaMatch = lower.match(/siapa\s+(.+)/);
+    if (siapaMatch) {
+        return `${siapaMatch[1]} 2026`;
+    }
+
+    // "kapan X" -> jadwal X
+    const kapanMatch = lower.match(/kapan\s+(.+)/);
+    if (kapanMatch) {
+        return `${kapanMatch[1]} 2026`;
+    }
+
+    // Remove conversational words for better search results
+    let q = teks.replace(/\b(tolong|bisa|yang|di|ke|dari|dan|atau|saya|aku|kami|kamu|enggak|tidak|iya|ya|oh)\b/gi, '');
+    q = q.replace(/\s+/g, ' ').trim();
+    if (q.length < 3) return teks;
+
+    // Add current year for recency
+    if (!/\b(202[0-9]|20[0-9]{2})\b/.test(q)) {
+        q += ' 2026';
+    }
+    return q;
 }
 
 module.exports = { searchWeb: searchWebWithWeather, searchWebRaw: searchWeb };
