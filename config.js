@@ -12,5 +12,10 @@ module.exports = {
         'error': ['6282114295380@s.whatsapp.net'],
         'server': ['6282114295380@s.whatsapp.net'],
         'review': ['6282114295380@s.whatsapp.net'],
+        'arliusmar': ['6282114295380@s.whatsapp.net'],
+        'wibisono': ['6282114295380@s.whatsapp.net'],
+        'arli': ['6282114295380@s.whatsapp.net'],
+        'usmar': ['6282114295380@s.whatsapp.net'],
+        'uus': ['6282114295380@s.whatsapp.net'],
     }
 };
