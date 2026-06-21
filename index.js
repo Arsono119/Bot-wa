@@ -1,4 +1,4 @@
-const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys');
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const qrcode = require('qrcode-terminal');
 const config = require('./config');
@@ -16,16 +16,25 @@ async function startBot() {
 
     sock.ev.on('creds.update', saveCreds);
 
-    sock.ev.on('connection.update', ({ connection, qr }) => {
+    sock.ev.on('connection.update', ({ connection, lastDisconnect, qr }) => {
         if (qr) {
-            console.log('\nâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+            console.log('\n═══════════════════════════════════════════');
             console.log('  SCAN QR CODE INI DENGAN WHATSAPP KAMU');
             console.log('  Buka WhatsApp > Titik 3 > Linked Devices');
-            console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•\n');
+            console.log('═══════════════════════════════════════════\n');
             qrcode.generate(qr, { small: true });
         }
-        if (connection === 'close') startBot();
-        else if (connection === 'open') console.log(config.pesanAktif);
+        if (connection === 'close') {
+            const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+            if (shouldReconnect) {
+                console.log('\n⚠️  Koneksi terputus, reconnect...');
+                startBot();
+            } else {
+                console.log('\n❌ Logout dari WhatsApp, scan QR lagi.');
+            }
+        } else if (connection === 'open') {
+            console.log(config.pesanAktif);
+        }
     });
 
     sock.ev.on('messages.upsert', async (m) => {
