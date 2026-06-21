@@ -4,4 +4,3 @@ session/
 creds.json
 *.json
 data/
-config.js
