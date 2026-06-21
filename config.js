@@ -5,12 +5,12 @@ module.exports = {
     groqKey: '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',
 
     keywords: {
-        'urgent': ['628xxx@whatsapp.net'],
-        'penting': ['628xxx@whatsapp.net'],
-        'tolong': ['628yyy@whatsapp.net'],
-        'bantuan': ['628yyy@whatsapp.net'],
-        'error': ['628zzz@whatsapp.net'],
-        'server': ['628zzz@whatsapp.net'],
-        'review': ['628www@whatsapp.net'],
+        'urgent': ['6282114295380@s.whatsapp.net'],
+        'penting': ['6282114295380@s.whatsapp.net'],
+        'tolong': ['6282114295380@s.whatsapp.net'],
+        'bantuan': ['6282114295380@s.whatsapp.net'],
+        'error': ['6282114295380@s.whatsapp.net'],
+        'server': ['6282114295380@s.whatsapp.net'],
+        'review': ['6282114295380@s.whatsapp.net'],
     }
 };
